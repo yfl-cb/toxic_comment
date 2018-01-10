@@ -47,10 +47,14 @@ X_te = sequence.pad_sequences(list_tokenized_test, maxlen=maxlen)
 # 函数式模型构建
 def get_model():
     embed_size = 128
+    # 输入是一个一阶张量，即一篇文档的sequence
     inp = Input(shape=(maxlen, ))
-    # 是把输入的向量转化为embed_size维度的向量
+    # 是把输入的张量每个元素转化为embed_size维度的张量，输入到LSTM中去，这里边maxlen像是time_steps
+    # 这里可以考虑用已经训练好的词向量，可能是写一个embeddings_regularizer方法
     x = Embedding(max_features, embed_size)(inp)
+    # 把每个词的张量挨个输入，输出的每个词的张量维度是50，最终是maxlen * 50
     x = Bidirectional(LSTM(50, return_sequences=True))(x)
+    # 对时间信号的全局最大池化，看起来是挑一个最大的
     x = GlobalMaxPool1D()(x)
     x = Dropout(0.1)(x)
     x = Dense(50, activation="relu")(x)
